@@ -59,5 +59,9 @@ module fifo_sync #(
   assert property (@(posedge clk) disable iff (!rst_n) (wr_en && full) |=> (wr_ptr == $past(
       wr_ptr
   )));
+  // rd_ptr should not change if you try to read on empty fifo
+  assert property (@(posedge clk) disable iff (!rst_n) (rd_en && empty) |=> (rd_ptr == $past(
+      rd_ptr
+  )));
 endmodule
 
