@@ -37,6 +37,7 @@
 unisims
 
 ## dirs
+vivado
 vivado.cache/
 vivado.hw/
 vivado.ip_user_files/
