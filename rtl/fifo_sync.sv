@@ -41,8 +41,6 @@ module fifo_sync #(
     if (!rst_n) begin
       wr_ptr <= 0;
       rd_ptr <= 0;
-      wr_err <= 0;
-      rd_err <= 0;
     end else begin
       if (wr_en && !full) begin
         arr[wr_ptr[AddrWidth-1:0]] <= wr_data;
@@ -53,6 +51,10 @@ module fifo_sync #(
       end
     end
   end
+
+  assert property (@(posedge clk) disable iff (!rst_n) wr_err == (wr_en && full));
+
+  assert property (@(posedge clk) disable iff (!rst_n) rd_err == (rd_en && empty));
 
   assert property (@(posedge clk) disable iff (!rst_n) !(full && empty));
 endmodule
