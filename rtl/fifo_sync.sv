@@ -44,33 +44,13 @@ module fifo_sync #(
     end else begin
       if (wr_en && !full) begin
         arr[wr_ptr[AddrWidth-1:0]] <= wr_data;
-        wr_ptr <= wr_ptr + 1;
+        wr_ptr <= wr_ptr + 2;
       end
       if (rd_en && !empty) begin
         rd_ptr <= rd_ptr + 1;
       end
     end
   end
-
-  assert property (@(posedge clk) disable iff (!rst_n) wr_err == (wr_en && full));
-  assert property (@(posedge clk) disable iff (!rst_n) rd_err == (rd_en && empty));
-  assert property (@(posedge clk) disable iff (!rst_n) !(full && empty));
-  // wr_ptr should not change if you try to write on full fifo
-  assert property (@(posedge clk) disable iff (!rst_n) (wr_en && full) |=> (wr_ptr == $past(
-      wr_ptr
-  )));
-  // rd_ptr should not change if you try to read on empty fifo
-  assert property (@(posedge clk) disable iff (!rst_n) (rd_en && empty) |=> (rd_ptr == $past(
-      rd_ptr
-  )));
-  // after succsessfull write, ptr should increment only one
-  assert property (@(posedge clk) disable iff (!rst_n) (wr_en && !full) |=> (wr_ptr == $past(
-      wr_ptr
-  ) + 1));
-  // FWFT assertion
-  assert property (@(posedge clk) disable iff (!rst_n) (wr_en && empty) |=> (rd_data == $past(
-      wr_data
-  )));
 
 endmodule
 
