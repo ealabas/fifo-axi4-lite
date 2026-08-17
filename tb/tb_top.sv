@@ -44,11 +44,11 @@ module tb_top;
     @(posedge clk);
     wr_data <= 40;
     @(posedge clk);
-    wr_en <= 0;
-    @(posedge clk);
-    @(posedge clk);
-    @(posedge clk);
     wr_data <= 50;
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    wr_en <= 0;
 
     @(posedge clk);
     @(posedge clk);

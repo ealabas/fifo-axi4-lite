@@ -53,9 +53,11 @@ module fifo_sync #(
   end
 
   assert property (@(posedge clk) disable iff (!rst_n) wr_err == (wr_en && full));
-
   assert property (@(posedge clk) disable iff (!rst_n) rd_err == (rd_en && empty));
-
   assert property (@(posedge clk) disable iff (!rst_n) !(full && empty));
+  // wr_ptr should not change if you try to write on full fifo
+  assert property (@(posedge clk) disable iff (!rst_n) (wr_en && full) |=> (wr_ptr == $past(
+      wr_ptr
+  )));
 endmodule
 
