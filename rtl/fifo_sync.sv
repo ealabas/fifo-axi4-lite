@@ -53,5 +53,7 @@ module fifo_sync #(
       end
     end
   end
+
+  assert property (@(posedge clk) disable iff (!rst_n) !(full && empty));
 endmodule
 
