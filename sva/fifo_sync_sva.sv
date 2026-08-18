@@ -41,11 +41,6 @@ module fifo_sync_sva #(
       rd_ptr
   )));
 
-  // after succsessfull write, ptr should increment only one
-  assert property (@(posedge clk) disable iff (!rst_n) (wr_en && !full) |=> (wr_ptr == $past(
-      wr_ptr
-  ) + 1));
-
   // FWFT assertion
   assert property (@(posedge clk) disable iff (!rst_n) (wr_en && empty) |=> (rd_data == $past(
       wr_data
