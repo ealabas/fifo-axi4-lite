@@ -6,6 +6,9 @@ module tb_selfcheck;
   logic full, empty, wr_err, rd_err;
   logic [WIDTH-1:0] wr_data, rd_data;
 
+  int checks;
+  int errors;
+
   fifo_sync #(
       .WIDTH(WIDTH),
       .DEPTH(DEPTH)
@@ -43,12 +46,23 @@ module tb_selfcheck;
       wr_data <= $urandom();
     end
     @(posedge clk);
+    $display("==================================");
+    $display("TEST DONE: %0d checks, %0d errors", checks, errors);
+    if (errors == 0) $display("RESULT: PASS");
+    else begin
+      $display("RESULT: FAIL (%0d mismatches)", errors);
+      $display("==================================");
+    end
     $finish;
   end
 
   always @(posedge clk) begin
     if (!empty) begin
-      if (rd_data !== data[0]) $error("mismatch");
+      checks = checks + 1;
+      if (rd_data !== data[0]) begin
+        errors = errors + 1;
+        $error("[%0t] MISMATCH: expected %h, got %h", $time, data[0], rd_data);
+      end
     end
 
     if (wr_en && !full) begin

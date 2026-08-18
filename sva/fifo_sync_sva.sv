@@ -41,6 +41,8 @@ module fifo_sync_sva #(
       rd_ptr
   )));
 
+  // TO-DO: wr_ptr should increment only one assertion to check wrap
+
   // FWFT assertion
   assert property (@(posedge clk) disable iff (!rst_n) (wr_en && empty) |=> (rd_data == $past(
       wr_data
