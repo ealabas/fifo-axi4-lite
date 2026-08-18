@@ -81,3 +81,77 @@ When the FIFO is neither full nor empty and both `rd_en` and `wr_en` are asserte
 - FWFT read, to reduce read latency.
 - Explicit error outputs, to make illegal read/write attempts visible.
 - On a simultaneous read and write: when full, the write is rejected and the read is accepted; when empty, the read is rejected and the write is accepted.
+
+## AXI4-Lite register map
+
+All register offsets are 32-bit word-aligned. The AXI4-Lite address bus is byte-addressed, so each 32-bit register is placed at a 4-byte boundary.
+
+| Offset | Name          | Access | Description                                                                             |
+| ------ | ------------- | ------ | --------------------------------------------------------------------------------------- |
+| `0x00` | `FIFO_WR`     | W      | Write data register. AXI write to this offset pushes wr_data into the FIFO.             |
+| `0x04` | `FIFO_RD`     | R      | Read data register. AXI read from this offset pops the head of the FIFO and returns it. |
+| `0x08` | `FIFO_STATUS` | R      | Status register. Read gives full, empty info                                |
+
+Reading from FIFO_RD is not idempotent. Each read removes one word from the FIFO and advances the read pointer.
+
+| Bit    | Name     | Access | Description     |
+| ------ | -------- | ------ | --------------- |
+| 0      | `empty`  | R      | FIFO empty flag |
+| 1      | `full`   | R      | FIFO full flag  |
+| Others | reserved | -      | Read as 0       |
+
+Separate register addresses for write data (FIFO_WR) and read data (FIFO_RD)	Keeps AXI read and write side effects distinct.
+
+## AXI4-Lite port list
+
+### Clock and Reset
+
+| Signal          | Direction | Width | Description                              |
+|-----------------|-----------|-------|------------------------------------------|
+| `S_AXI_ACLK`    | input     | 1     | AXI clock (same as FIFO clock)           |
+| `S_AXI_ARESETN` | input     | 1     | AXI active-low synchronous reset         |
+
+### AW Channel (Write Address)
+
+| Signal          | Direction | Width       | Description                     |
+|-----------------|-----------|-------------|---------------------------------|
+| `S_AXI_AWADDR`  | input     | `ADDR_WIDTH` | Write address                   |
+| `S_AXI_AWVALID` | input     | 1           | Write address valid             |
+| `S_AXI_AWREADY` | output    | 1           | Write address ready             |
+
+### W Channel (Write Data)
+
+| Signal         | Direction | Width          | Description          |
+|----------------|-----------|----------------|----------------------|
+| `S_AXI_WDATA`  | input     | `DATA_WIDTH`   | Write data           |
+| `S_AXI_WSTRB`  | input     | `DATA_WIDTH/8` | Byte write strobes   |
+| `S_AXI_WVALID` | input     | 1              | Write data valid     |
+| `S_AXI_WREADY` | output    | 1              | Write data ready     |
+
+### B Channel (Write Response)
+
+| Signal         | Direction | Width | Description                                |
+|----------------|-----------|-------|--------------------------------------------|
+| `S_AXI_BRESP`  | output    | 2     | Write response (`00` = OKAY, `10` = SLVERR) |
+| `S_AXI_BVALID` | output    | 1     | Write response valid                       |
+| `S_AXI_BREADY` | input     | 1     | Master response ready                      |
+
+### AR Channel (Read Address)
+
+| Signal          | Direction | Width       | Description          |
+|-----------------|-----------|-------------|----------------------|
+| `S_AXI_ARADDR`  | input     | `ADDR_WIDTH` | Read address         |
+| `S_AXI_ARVALID` | input     | 1           | Read address valid   |
+| `S_AXI_ARREADY` | output    | 1           | Read address ready   |
+
+### R Channel (Read Data)
+
+| Signal         | Direction | Width       | Description                                |
+|----------------|-----------|-------------|--------------------------------------------|
+| `S_AXI_RDATA`  | output    | `DATA_WIDTH` | Read data                                  |
+| `S_AXI_RRESP`  | output    | 2           | Read response (`00` = OKAY, `10` = SLVERR) |
+| `S_AXI_RVALID` | output    | 1           | Read data valid                            |
+| `S_AXI_RREADY` | input     | 1           | Master read data ready                     |
+
+This design uses ADDR_WIDTH = 4. The register map spans byte addresses 0x00–0x08, which is 12 bytes, so 4 address bits are sufficient.
+DATA_WIDTH fixed to 32 bits for AXI4-Lite.
