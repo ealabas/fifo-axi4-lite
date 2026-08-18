@@ -53,7 +53,27 @@ module axil_fifo #(
 
   logic [ADDR_WIDTH-1:0] awaddr_r;
   logic [WIDTH-1:0] w_data_r;
+  logic wr_err_r;
 
+  // write sequential logic
+  always_ff @(posedge S_AXI_ACLK) begin
+    if (!S_AXI_ARESETN) begin
+      wr_state <= IDLE;
+      awaddr_r <= 0;
+      w_data_r <= 0;
+      wr_err_r <= 0;
+    end else begin
+      wr_state <= wr_state_next;
+      if (wr_state == IDLE && S_AXI_AWVALID && S_AXI_WVALID) begin
+        awaddr_r <= S_AXI_AWADDR;
+        w_data_r <= S_AXI_WDATA;
+      end
+
+      if (wr_state == WRITE) wr_err_r <= fifo_wr_err;
+    end
+  end
+
+  // write next state logic
   always_comb begin
     case (wr_state)
       IDLE: begin
@@ -72,6 +92,21 @@ module axil_fifo #(
 
       default: wr_state_next = IDLE;
     endcase
+  end
+
+  // output logic
+  // ready signals, we are always ready in IDLE state
+  assign S_AXI_AWREADY = (wr_state == IDLE);
+  assign S_AXI_WREADY = (wr_state == IDLE);
+
+  // fifo outputs
+  assign fifo_wr_en = (wr_state == WRITE) && (awaddr_r[3:2] == 2'b00);
+  assign fifo_wr_data = w_data_r;
+
+  // B channel
+  always_comb begin
+    S_AXI_BVALID = (wr_state == RESP);
+    S_AXI_BRESP  = wr_err_r ? 2'b10 : 2'b00;
   end
 
   fifo_sync #(
