@@ -1,3 +1,6 @@
+import axi_vip_pkg::*;
+import axi_vip_0_pkg::*;
+
 module tb_axil_fifo;
   bit clk = 0;
   bit rst_n = 0;
