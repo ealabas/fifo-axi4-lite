@@ -1,0 +1,39 @@
+module tb_selfcheck;
+  localparam int WIDTH = 32;
+  localparam int DEPTH = 4;
+
+  logic clk, rst_n, wr_en, rd_en;
+  logic full, empty, wr_err, rd_err;
+  logic [WIDTH-1:0] wr_data, rd_data;
+
+  fifo_sync #(
+      .WIDTH(WIDTH),
+      .DEPTH(DEPTH)
+  ) dut (
+      .clk(clk),
+      .rst_n(rst_n),
+      .wr_en(wr_en),
+      .wr_data(wr_data),
+      .rd_en(rd_en),
+      .rd_data(rd_data),
+      .full(full),
+      .empty(empty),
+      .wr_err(wr_err),
+      .rd_err(rd_err)
+  );
+
+  initial begin
+    clk = 0;
+  end
+  always #5 clk = ~clk;
+
+  initial begin
+    rst_n   = 0;
+    wr_en   = 0;
+    rd_en   = 0;
+    wr_data = 0;
+    #20 rst_n = 1;
+    @(posedge clk);
+  end
+
+endmodule
