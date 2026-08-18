@@ -94,7 +94,7 @@ module axil_fifo #(
     endcase
   end
 
-  // output logic
+  // write output logic
   // ready signals, we are always ready in IDLE state
   assign S_AXI_AWREADY = (wr_state == IDLE);
   assign S_AXI_WREADY = (wr_state == IDLE);
@@ -107,6 +107,68 @@ module axil_fifo #(
   always_comb begin
     S_AXI_BVALID = (wr_state == RESP);
     S_AXI_BRESP  = wr_err_r ? 2'b10 : 2'b00;
+  end
+
+  typedef enum logic [1:0] {
+    R_IDLE,
+    R_READ
+  } r_state_t;
+
+  r_state_t rd_state, rd_state_next;
+
+  logic [ADDR_WIDTH-1:0] araddr_r;
+  logic rd_err_r;
+
+  always_ff @(posedge S_AXI_ACLK) begin
+    if (!S_AXI_ARESETN) begin
+      rd_state <= R_IDLE;
+      araddr_r <= 0;
+      rd_err_r <= 0;
+    end else begin
+      rd_state <= rd_state_next;
+      if (rd_state == R_IDLE && S_AXI_ARVALID) araddr_r <= S_AXI_ARADDR;
+      if (rd_state == R_READ && S_AXI_RREADY) begin
+        if (araddr_r[3:2] == 2'b01) rd_err_r <= fifo_rd_err;
+        else rd_err_r <= 0;
+      end
+    end
+  end
+
+  always_comb begin
+    case (rd_state)
+      R_IDLE: begin
+        if (S_AXI_ARVALID) rd_state_next = R_READ;
+        else rd_state_next = R_IDLE;
+      end
+
+      R_READ: begin
+        if (S_AXI_RREADY) rd_state_next = R_IDLE;
+        else rd_state_next = R_READ;
+      end
+
+      default: rd_state_next = R_IDLE;
+    endcase
+  end
+
+  // read output logic
+  assign S_AXI_ARREADY = (rd_state == R_IDLE);
+  assign S_AXI_RVALID = (rd_state == R_READ);
+
+  // fifo outputs
+  assign fifo_rd_en = (rd_state == R_READ) && S_AXI_RREADY && (araddr_r[3:2] == 2'b01);
+
+  // select fifo read output: fifo read or status
+  always_comb begin
+    case (araddr_r[3:2])
+      2'b01:   S_AXI_RDATA = fifo_rd_data;
+      2'b10:   S_AXI_RDATA = {30'b0, fifo_wr_err, fifo_rd_err};
+      default: S_AXI_RDATA = '0;
+    endcase
+  end
+
+  // read response
+  always_comb begin
+    S_AXI_RRESP = rd_err_r ? 2'b10 : 2'b00;
   end
 
   fifo_sync #(
