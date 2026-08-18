@@ -22,6 +22,8 @@ module tb_selfcheck;
       .rd_err(rd_err)
   );
 
+  logic [WIDTH-1:0] data[$:DEPTH];
+
   initial begin
     clk = 0;
   end
@@ -34,6 +36,49 @@ module tb_selfcheck;
     wr_data = 0;
     #20 rst_n = 1;
     @(posedge clk);
+    wr_en   <= 1;
+    wr_data <= 10;
+    @(posedge clk);
+    wr_data <= 20;
+    @(posedge clk);
+    wr_data <= 30;
+    @(posedge clk);
+    wr_data <= 40;
+    @(posedge clk);
+    wr_data <= 50;
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    wr_en <= 0;
+
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    rd_en <= 1;
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    rd_en <= 0;
+    @(posedge clk);
+    @(posedge clk);
+    @(posedge clk);
+    $finish;
+  end
+
+  always @(posedge clk) begin
+    if (!empty) begin
+      if (rd_data !== data[0]) $error("mismatch");
+    end
+
+    if (wr_en && !full) begin
+      data.push_back(wr_data);
+    end
+
+    if (rd_en && !empty) begin
+      data.pop_front();
+    end
   end
 
 endmodule

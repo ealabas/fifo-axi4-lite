@@ -1,3 +1,4 @@
+/*
 module tb_top;
   localparam int WIDTH = 32;
   localparam int DEPTH = 4;
@@ -67,3 +68,4 @@ module tb_top;
   end
 
 endmodule
+*/

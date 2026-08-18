@@ -44,7 +44,7 @@ module fifo_sync #(
     end else begin
       if (wr_en && !full) begin
         arr[wr_ptr[AddrWidth-1:0]] <= wr_data;
-        wr_ptr <= wr_ptr + 2;
+        wr_ptr <= wr_ptr + 1;
       end
       if (rd_en && !empty) begin
         rd_ptr <= rd_ptr + 1;
