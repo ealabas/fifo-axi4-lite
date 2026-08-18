@@ -51,8 +51,8 @@ module tb_selfcheck;
     if (errors == 0) $display("RESULT: PASS");
     else begin
       $display("RESULT: FAIL (%0d mismatches)", errors);
-      $display("==================================");
     end
+    $display("==================================");
     $finish;
   end
 
