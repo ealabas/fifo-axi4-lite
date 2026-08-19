@@ -1,6 +1,6 @@
 module axil_fifo #(
     parameter int WIDTH      = 32,
-    parameter int ADDR_WIDTH = 4,
+    parameter int ADDR_WIDTH = 32,
     parameter int DEPTH      = 4
 ) (
     input logic S_AXI_ACLK,
