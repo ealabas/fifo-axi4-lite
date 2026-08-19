@@ -127,11 +127,11 @@ module tb_axil_fifo;
     // Test 4: Read from empty FIFO (address 0x04) should return 0,
     // and status should show empty flag set
     master_agent.AXI4LITE_READ_BURST(32'h0000_0004, 0, empty_read_data, empty_read_resp);
-    $display("[%0t] READ from empty data=0x%h, resp=%0d", $time, empty_read_data, empty_read_resp);
+    $display("[%0t] READ from empty, data=0x%h, resp=%0d", $time, empty_read_data, empty_read_resp);
 
     // Read status after empty read
     master_agent.AXI4LITE_READ_BURST(32'h0000_0008, 0, status2, status2_resp);
-    $display("[%0t] STATUS after empty read=0x%h, resp=%0d", $time, status2, status2_resp);
+    $display("[%0t] STATUS after empty, read=0x%h, resp=%0d", $time, status2, status2_resp);
 
 
     // Test 5: Write to full FIFO (DEPTH=4) to see SLVERR
@@ -144,7 +144,7 @@ module tb_axil_fifo;
 
     // Now try to write when full to see SLVERR
     master_agent.AXI4LITE_WRITE_BURST(32'h0000_0000, 0, 32'hFFFF_FFFF, full_resp);
-    $display("[%0t] Write to full resp=%0d (expect 2 for SLVERR)", $time, full_resp);
+    $display("[%0t] Write after full, resp=%0d", $time, full_resp);
 
     $finish;
   end
