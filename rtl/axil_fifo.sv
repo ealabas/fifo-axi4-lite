@@ -193,10 +193,6 @@ module axil_fifo #(
     endcase
   end
 
-  always_comb begin
-    S_AXI_RRESP = rd_err_r ? 2'b10 : 2'b00;
-  end
-
   // FIFO instance
   fifo_sync #(
       .WIDTH(WIDTH),
