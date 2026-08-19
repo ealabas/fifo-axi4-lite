@@ -74,4 +74,14 @@ module tb_selfcheck;
     end
   end
 
+  // functional coverage
+  covergroup fifo_cg @(posedge clk);
+    cp_full: coverpoint full;
+    cp_empty: coverpoint empty;
+    cp_wr: coverpoint wr_en;
+    cp_rd: coverpoint rd_en;
+  endgroup
+
+  fifo_cg cg_inst = new();
+
 endmodule
