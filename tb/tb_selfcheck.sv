@@ -53,6 +53,8 @@ module tb_selfcheck;
       $display("RESULT: FAIL (%0d mismatches)", errors);
     end
     $display("==================================");
+
+    $display("Coverage = %.2f%%", cg_inst.get_coverage());
     $finish;
   end
 
@@ -80,6 +82,10 @@ module tb_selfcheck;
     cp_empty: coverpoint empty;
     cp_wr: coverpoint wr_en;
     cp_rd: coverpoint rd_en;
+
+    x_wr_rd: cross cp_wr, cp_rd;
+    x_full_wr: cross cp_full, cp_wr;
+    x_empty_rd: cross cp_empty, cp_rd;
   endgroup
 
   fifo_cg cg_inst = new();
