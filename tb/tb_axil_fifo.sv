@@ -81,6 +81,10 @@ module tb_axil_fifo;
       bins fifo_rd = {2'b01};
       bins fifo_status = {2'b10};
       bins reserved = {2'b11};
+
+      ignore_bins ignore_rd = {2'b01};
+      ignore_bins ignore_status = {2'b10};
+      ignore_bins ignore_reserved = {2'b11};
     }
 
     cp_rd_addr: coverpoint araddr[3:2] {
@@ -88,6 +92,8 @@ module tb_axil_fifo;
       bins fifo_rd = {2'b01};
       bins fifo_status = {2'b10};
       bins reserved = {2'b11};
+
+      ignore_bins ignore_reserved = {2'b11};
     }
 
     cp_b_resp: coverpoint bresp {bins okay = {2'b00}; bins slverr = {2'b10};}
