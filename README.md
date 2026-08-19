@@ -69,6 +69,50 @@ fifo-axi4-lite/
 
 ---
 
+## How to Run
+
+The design is simulated with Xilinx Vivado XSim. The repository does not
+include the Vivado project files (the `vivado/` directory is gitignored),
+so sources are added to a fresh project.
+
+### Setup
+
+1. Create a new RTL project in Vivado (2024.2 or later).
+2. Add the following as **design sources**:
+   - `rtl/fifo_sync.sv`
+   - `rtl/axil_fifo.sv`
+3. Add the following as **simulation sources**:
+   - `tb/tb_selfcheck.sv`
+   - `tb/tb_axil_fifo.sv`
+   - `sva/fifo_sync_sva.sv`
+4. For the AXI wrapper testbench, add an **AXI Verification IP** from the
+   IP Catalog (master mode, AXI4-Lite, 32-bit address and data) and name it
+   `axi_vip_0`.
+
+### Run the FIFO core testbench
+
+1. Set the simulation top to `tb_selfcheck`.
+2. Run Behavioral Simulation.
+3. The testbench runs 200 random cycles with a self-checking scoreboard and
+   reports `RESULT: PASS` along with the functional coverage percentage.
+
+### Run the AXI wrapper testbench
+
+1. Set the simulation top to `tb_axil_fifo`.
+2. Run Behavioral Simulation.
+3. The testbench drives the wrapper through the AXI VIP across five scenarios
+   (write, read-back, status, empty-read SLVERR, full-write SLVERR) and reports
+   `ALL TESTS PASSED`. The VIP's end-of-simulation protocol checks run clean.
+
+### Generate a coverage report (optional)
+
+After a simulation completes, in the Tcl console:
+
+```tcl
+   write_xsim_coverage
+   export_xsim_coverage -open_html true
+```
+
 ## IP Packaging
 
 The AXI4-Lite wrapper is packaged as a Vivado IP, ready for use in block designs.
