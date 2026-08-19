@@ -73,6 +73,29 @@ module tb_axil_fifo;
 
   always #5 clk = ~clk;
 
+  // axi func coverage
+
+  covergroup axi_cg @(posedge clk);
+    cp_wr_addr: coverpoint awaddr[3:2] {
+      bins fifo_wr = {2'b00};
+      bins fifo_rd = {2'b01};
+      bins fifo_status = {2'b10};
+      bins reserved = {2'b11};
+    }
+
+    cp_rd_addr: coverpoint araddr[3:2] {
+      bins fifo_wr = {2'b00};
+      bins fifo_rd = {2'b01};
+      bins fifo_status = {2'b10};
+      bins reserved = {2'b11};
+    }
+
+    cp_b_resp: coverpoint bresp {bins okay = {2'b00}; bins slverr = {2'b10};}
+    cp_r_resp: coverpoint rresp {bins okay = {2'b00}; bins slverr = {2'b10};}
+  endgroup
+
+  axi_cg axi_cg_inst = new();
+
   // ------------------ Stimulus ------------------
   initial begin
     axi_vip_0_mst_t master_agent;
@@ -184,6 +207,8 @@ module tb_axil_fifo;
     if (errors == 0) $display("ALL TESTS PASSED");
     else $display("TESTS FAILED: %0d errors", errors);
     $display("========================================");
+
+    $display("Coverage = %.2f%%", axi_cg_inst.get_coverage());
 
     $finish;
   end

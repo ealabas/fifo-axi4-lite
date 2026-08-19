@@ -8,6 +8,8 @@ module tb_selfcheck;
 
   int checks;
   int errors;
+  int burst_wr_cnt;
+  int burst_rd_cnt;
 
   fifo_sync #(
       .WIDTH(WIDTH),
@@ -74,6 +76,12 @@ module tb_selfcheck;
     if (rd_en && !empty) begin
       data.pop_front();
     end
+
+    if (wr_en && !full && !rd_en) burst_wr_cnt <= burst_wr_cnt + 1;
+    else burst_wr_cnt <= 0;
+
+    if (rd_en && !empty && !wr_en) burst_rd_cnt <= burst_rd_cnt + 1;
+    else burst_rd_cnt <= 0;
   end
 
   // functional coverage
@@ -86,6 +94,34 @@ module tb_selfcheck;
     x_wr_rd: cross cp_wr, cp_rd;
     x_full_wr: cross cp_full, cp_wr;
     x_empty_rd: cross cp_empty, cp_rd;
+
+    cp_occupancy: coverpoint data.size() {
+      bins level_0 = {0};
+      bins level_1 = {1};
+      bins level_2 = {2};
+      bins level_3 = {3};
+      bins level_4 = {4};
+    }
+
+    cp_wr_wrap: coverpoint dut.wr_ptr[2] {bins no_wrap = {0}; bins wrap = {1};}
+
+    cp_rd_wrap: coverpoint dut.rd_ptr[2] {bins no_wrap = {0}; bins wrap = {1};}
+
+    cp_wr_burst: coverpoint burst_wr_cnt {
+      bins no_burst = {0, 1}; bins burst_2 = {2}; bins burst_3 = {3}; bins burst_4 = {4};
+    }
+
+    cp_rd_burst: coverpoint burst_rd_cnt {
+      bins no_burst = {0, 1}; bins burst_2 = {2}; bins burst_3 = {3}; bins burst_4 = {4};
+    }
+
+    x_full_wr_rd: cross cp_full, cp_wr, cp_rd{
+      bins full_write_read = binsof(cp_full) intersect {1} &&
+        binsof(cp_wr) intersect {1} && binsof(cp_rd) intersect {
+        1
+      };
+    }
+
   endgroup
 
   fifo_cg cg_inst = new();
